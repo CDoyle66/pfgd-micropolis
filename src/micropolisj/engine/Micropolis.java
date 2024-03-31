@@ -10,6 +10,9 @@ package micropolisj.engine;
 
 import java.io.*;
 import java.util.*;
+import java.util.Random;
+
+import micropolisj.gui.MessagesPane;
 
 import static micropolisj.engine.TileConstants.*;
 
@@ -125,6 +128,7 @@ public class Micropolis
 	int nuclearCount;
 	int seaportCount;
 	int airportCount;
+	int parkCount;
 
 	int totalPop;
 	int lastCityPop;
@@ -164,6 +168,7 @@ public class Micropolis
 	boolean indCap;  // industry demands sea port,  caps indValve at 0
 	int crimeRamp;
 	int polluteRamp;
+	
 
 	//
 	// budget stuff
@@ -290,6 +295,11 @@ public class Micropolis
 	{
 		for (Listener l : listeners) {
 			l.evaluationChanged();
+		}
+		//Run Tourism Chance
+		double chance = Math.random();
+		if (chance <= 0.95) {
+			runTourism();
 		}
 	}
 
@@ -1142,6 +1152,7 @@ public class Micropolis
 
 		int landValueTotal = 0;
 		int landValueCount = 0;
+		int parkTick = 0;
 
 		final int HWLDX = (getWidth()+1)/2;
 		final int HWLDY = (getHeight()+1)/2;
@@ -1162,6 +1173,9 @@ public class Micropolis
 						int tile = getTile(mx, my);
 						if (tile != DIRT)
 						{
+							if (tile == 40 || tile == 41 || tile == 42 || tile == 43 || tile == 840 || tile == 841 || tile == 842 || tile == 843) {
+								parkTick++;
+							}
 							if (tile < RUBBLE) //natural land features
 							{
 								//inc terrainMem
@@ -1209,6 +1223,8 @@ public class Micropolis
 				}
 			}
 		}
+		
+		parkCount = parkTick;
 
 		landValueAverage = landValueCount != 0 ? (landValueTotal/landValueCount) : 0;
 
@@ -2508,7 +2524,6 @@ public class Micropolis
 					sendMessage(z);
 				}
 			}
-			lastCityPop = newPop;
 		}
 	}
 
@@ -2520,6 +2535,7 @@ public class Micropolis
 
 		int totalZoneCount = resZoneCount + comZoneCount + indZoneCount;
 		int powerCount = nuclearCount + coalCount;
+		
 
 		int z = cityTime % 64;
 		switch (z) {
@@ -2699,5 +2715,30 @@ public class Micropolis
 	public void setFunds(int totalFunds)
 	{
 		budget.totalFunds = totalFunds;
+	}
+	
+	//Tourism
+	public void runTourism() {
+		if (seaportCount >= 1 || airportCount >= 1) {
+			int moneyStart = ((seaportCount*500) + (airportCount*2000));
+			float posMod = (float) ((comZoneCount*0.07) + (parkCount*0.001)+ (stadiumCount*0.4));
+			float negMod = (float) ((pollutionAverage*0.01) + (crimeAverage*0.01));
+			float finalMod = (1+posMod-negMod);
+			if (finalMod > 0) {
+				int moneyEnd = (int) Math.ceil(moneyStart*finalMod);
+				//Send Message
+				micropolisj.gui.MessagesPane.touristCash = moneyEnd;
+				sendMessage(MicropolisMessage.TOURISTS_VISIT);
+				//Add funds
+				budget.totalFunds += moneyEnd;
+				fireFundsChanged();
+			}
+			else {
+				sendMessage(MicropolisMessage.NO_TOURISTS);
+			}
+		}
+		else {
+			sendMessage(MicropolisMessage.TOURISM_DEMAND);
+		}
 	}
 }

@@ -58,6 +58,9 @@ public enum MicropolisMessage
 	FLOOD_REPORT,
 	MELTDOWN_REPORT,        // 43            doMeltdown
 	RIOTING_REPORT,
+	TOURISTS_VISIT,
+	NO_TOURISTS,
+	TOURISM_DEMAND,
 
 	// added by Jason
 	NO_NUCLEAR_PLANTS;

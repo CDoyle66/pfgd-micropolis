@@ -17,6 +17,7 @@ import micropolisj.engine.*;
 public class MessagesPane extends JTextPane
 {
 	static ResourceBundle cityMessageStrings = ResourceBundle.getBundle("micropolisj.CityMessages");
+	public static int touristCash;
 
 	public MessagesPane()
 	{
@@ -25,7 +26,15 @@ public class MessagesPane extends JTextPane
 
 	public void appendCityMessage(MicropolisMessage message)
 	{
-		appendMessageText(cityMessageStrings.getString(message.name()));
+		if (message.name() == "TOURISTS_VISIT"){
+			String cash = Integer.toString(touristCash);
+			String notif = cityMessageStrings.getString(message.name());
+			notif = notif.replace("cash", cash);
+			appendMessageText(notif);
+		}
+		else{
+			appendMessageText(cityMessageStrings.getString(message.name()));
+		}
 	}
 
 	void appendMessageText(String messageText)
