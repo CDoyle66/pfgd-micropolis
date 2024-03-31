@@ -298,7 +298,7 @@ public class Micropolis
 		}
 		//Run Tourism Chance
 		double chance = Math.random();
-		if (chance <= 0.95) {
+		if (chance <= 0.25) {
 			runTourism();
 		}
 	}
@@ -1152,7 +1152,7 @@ public class Micropolis
 
 		int landValueTotal = 0;
 		int landValueCount = 0;
-		int parkTick = 0;
+		int parkTick = 0; //Counts the number of park tiles. Starts at zero to account for gains or losses in parks between checks.
 
 		final int HWLDX = (getWidth()+1)/2;
 		final int HWLDY = (getHeight()+1)/2;
@@ -1174,7 +1174,7 @@ public class Micropolis
 						if (tile != DIRT)
 						{
 							if (tile == 40 || tile == 41 || tile == 42 || tile == 43 || tile == 840 || tile == 841 || tile == 842 || tile == 843) {
-								parkTick++;
+								parkTick++; //increases park tile count if the tile is a park or fountain
 							}
 							if (tile < RUBBLE) //natural land features
 							{
@@ -1224,7 +1224,7 @@ public class Micropolis
 			}
 		}
 		
-		parkCount = parkTick;
+		parkCount = parkTick; //sets park count equal to the number of parks detected during this sweep.
 
 		landValueAverage = landValueCount != 0 ? (landValueTotal/landValueCount) : 0;
 
@@ -2719,22 +2719,21 @@ public class Micropolis
 	
 	//Tourism
 	public void runTourism() {
-		if (seaportCount >= 1 || airportCount >= 1) {
-			int moneyStart = ((seaportCount*500) + (airportCount*2000));
-			float posMod = (float) ((comZoneCount*0.07) + (parkCount*0.001)+ (stadiumCount*0.4));
-			float negMod = (float) ((pollutionAverage*0.01) + (crimeAverage*0.01));
+		if (seaportCount >= 1 || airportCount >= 1) { //does the city have at least 1 port or airport
+			int moneyStart = ((seaportCount*500) + (airportCount*2000)); //calculates starting $ amount based on number of transport hubs
+			float posMod = (float) ((comZoneCount*0.07) + (parkCount*0.001)+ (stadiumCount*0.4)); //positive modifier
+			float negMod = (float) ((pollutionAverage*0.01) + (crimeAverage*0.01)); //negative modifier
 			float finalMod = (1+posMod-negMod);
 			if (finalMod > 0) {
 				int moneyEnd = (int) Math.ceil(moneyStart*finalMod);
-				//Send Message
-				micropolisj.gui.MessagesPane.touristCash = moneyEnd;
+				micropolisj.gui.MessagesPane.touristCash = moneyEnd; //sets variable used by the message to display the exact amount of cash gained
 				sendMessage(MicropolisMessage.TOURISTS_VISIT);
 				//Add funds
 				budget.totalFunds += moneyEnd;
-				fireFundsChanged();
+				fireFundsChanged(); //update gui to reflect new balance
 			}
 			else {
-				sendMessage(MicropolisMessage.NO_TOURISTS);
+				sendMessage(MicropolisMessage.NO_TOURISTS); //sent if neg mod outweighs pos
 			}
 		}
 		else {

@@ -17,7 +17,7 @@ import micropolisj.engine.*;
 public class MessagesPane extends JTextPane
 {
 	static ResourceBundle cityMessageStrings = ResourceBundle.getBundle("micropolisj.CityMessages");
-	public static int touristCash;
+	public static int touristCash; //Holds variable for the exact amount of money obtained from tourism function
 
 	public MessagesPane()
 	{
@@ -29,7 +29,7 @@ public class MessagesPane extends JTextPane
 		if (message.name() == "TOURISTS_VISIT"){
 			String cash = Integer.toString(touristCash);
 			String notif = cityMessageStrings.getString(message.name());
-			notif = notif.replace("cash", cash);
+			notif = notif.replace("cash", cash); //replace the placeholder word 'cash' in the message string with the exact amount of money
 			appendMessageText(notif);
 		}
 		else{
